@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>From Modular Monolith to Micro Service | by James Randall</title>
+    
+    <meta name="description" content="Evolving .NET systems from modular monoliths to micro-services" />
+    <meta name="author" content="Henrik Ingo" />
+    <link rel="stylesheet" href="highlight/styles/github.css">
+
+        
+    <!--
+        Styles specific for this example presentation. 
+    -->
+    <link href="css/markdown-slides.css" rel="stylesheet" />
+    <link href="css/devopsy.css" rel="stylesheet" />
+    <link href="css/effects.css" rel="stylesheet" />
+    
+</head>
+
+<body class="impress-not-supported">
+<div class="fallback-message">
+    <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
+    <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
+</div>
+
+<div id="impress" data-transition-duration="1000">
+
+<div id="markdown" class="step slide markdown" data-rel-x="0" data-rel-y="900">
+# From Modular Monolith to Micro Service
+## James Randall
+### Blog - [https://www.azurefromthetrenches.com](https://wwww.azurefromthetrenches.com)
+### Twitter - [@azuretrenches](https://twitter.com/azuretrenches)
+### Code - [https://github.com/JamesRandall/fromModularMonolithToMicroservice](https://github.com/JamesRandall/fromModularMonolithToMicroservice)
+### Slides - [https://jamesrandall.github.io/fromModularMonolithToMicroservice/](https://jamesrandall.github.io/fromModularMonolithToMicroservice/)
+
+-----
+
+## A Bit About Me
+
+* Working "Cloud First" since 2011
+* Ran a lean startup inside an enterprise (good way to lose hair)
+* Worked as a consultant in a variety of organisations from enterprise integration through to hyper-scale eCommerce
+* Currently work as an independent consultant: 
+  * Architecture / code consultancy
+  * Problem solving
+  * End to end product / solution development
+
+-----
+
+## What Is A Modular Monolith?
+
+* A unit of software that addresses multiple concerns
+* Internally decomposed into isolated modules or subsystems
+* Significant proportion of intra-subsystem communication occurs in-process
+* The modules and subsystems deploy and scale together
+* A system, as perceived by a customer, may be made up of only one of these
+
+-----
+
+## What Are Micro Services?
+
+* A unit of software that addresses a single concern
+* Deploys and scales independently to other services
+* Communication with other systems occurs via APIs(REST, queues, events etc.) and usually over a network
+* A system, as perceived by a customer, may be made up of tens, hundreds or even thousands of micro-services
+
+-----
+
+## Why From Modular Monolith To Micro Service
+
+* I spent time working:
+    * With small teams struggling for market fit
+    * In large organisations with hundreds of developers where the primary challenge was scale - technical, volume and organisational
+* And saw:
+    * Micro services slow small projects to a crawl and become impediments to addressing actual challenges    
+    * Micro services help large projects scale - both technically and organisationally
+    * Monoliths help kick start small projects
+    * Traditional monoliths grow from small to large becoming an ever more crippling and frail millstone
+    * Monoliths expensively rewritten into micro services
+
+-----
+
+## Development is a Journey
+
+* The needs of a product, system and team change over time
+* There isn't a "one size fits all" answer, its all about the right tradeoffs
+* What's beneficial at one point in time can be an impediment at another
+* Acknowledging that - can we optimise for the journey?
+
+</div>
+
+<div id="custom-slide-1" class="step slide" data-rex-x="0" data-rel-y="900">
+    <div style="background-image: url(images/martin_fowler_productivity.png); background-position: center; background-repeat: no-repeat; background-size: contain; width: 100%; height: 100%;">
+    </div>
+</div>
+
+<div id="markdown2" class="step slide markdown" data-rel-x="0" data-rel-y="900">
+## Typical Monoliths
+
+* Tend to use layered architecture (sometimes called onion layer)
+* Decoupling occurs using interfaces and an IoC container e.g.
+    * StoreService implements IStoreService and makes use of an IStoreRepository implemented by a StoreRepository
+* As they get larger services begin to rely on other services and things get quite spaghetti like
+* Cross cutting concerns (e.g. logging) are often:
+    * Implemented as services themselves and injected into other services with each service (ILogger) sometimes using a decorator approach
+    * Or they use features of the container framework (e.g. filters in ASP.NET Core)
+
+-----
+
+## What Are The Downsides of This approach
+
+* None of these things are inevitable but:
+    * They have a habit of turning into spaghetti and early attempts to wall off sub-systems tend to break down
+    * It can be difficult to apply generic / abstract code to the per service interface approach
+    * They tend to have a lot of boilerplate
+    * It can be hard to decouple from the container technology
+
+-----
+
+## Creating A Modular Monolith that Can Evolve Into Micro Services
+
+* Express operations using state 
+* Use assemblies and access modifiers (public, internal, etc.) to define boundaries that are enforceable through easy static analysis
+* Communicate (sub-system) operations through a mediator
+* Describe sub-system communication using configuration
+* Reduce boilerplate by addressing cross-cutting concerns with the mediator
+    * Avoid coupling cross-cutting concerns, where possible, to container frameworks - keep them portable
+</div>
+
+<div id="custom-slide-2" class="step slide" data-rex-x="0" data-rel-y="900">
+    <div style="background-image: url(images/MediatorAsPartOfAModularMonolith.png); background-position: center; background-repeat: no-repeat; background-size: contain; width: 100%; height: 100%;">
+    </div>
+</div>
+
+<div id="markdown3" class="step slide markdown" data-rel-x="0" data-rel-y="900">
+# Code!
+
+-----
+
+# Decomposing Into Micro Services
+
+* To demonstrate how the approach we've adopted can facilitate decomposition into isolated services we'll pull out the notification and product subsystems
+* To keep things clear this example is slightly artificial:
+    * I have kept things in a single solution
+    * I have used project references
+* In a real world solution each subsystem would be:
+    * Isolated in its own git repository
+    * Expose API contracts as swagger documents, JSON schema, and/or NuGet client packages
+</div>
+
+<div id="custom-slide-3" class="step slide" data-rex-x="0" data-rel-y="900">
+    <div style="background-image: url(images/MediatorBehaviourFollowingDecomposition.png); background-position: center; background-repeat: no-repeat; background-size: contain; width: 100%; height: 100%;">
+    </div>
+</div>
+
+<div id="markdown4" class="step slide markdown" data-rel-x="0" data-rel-y="900">
+# Code!
+
+-----
+
+## Summary
+
+* When designing a system consider your current challenges, capabilities, and likely direction of travel
+* Expressing operations as state allows for a great deal of flexibility
+* Focus on being DRY and cleanly separating concerns - it will make it easier to evolve your system
+
+
+-----
+</div>
+
+</div>
+
+<div id="impress-toolbar"></div>
+<div id="impress-help"></div>
+
+
+<!-- Extra modules
+     Load highlight.js, mermaid.js and markdown.js from extras.
+     See also src/plugins/extras/extras.js -->
+<script type="text/javascript" src="highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="mermaid/mermaid.min.js"></script>
+<script type="text/javascript" src="markdown/markdown.js"></script>
+
+<!--
+    To make all described above really work, you need to include impress.js in the page.
+    You also need to call a `impress().init()` function to initialize impress.js presentation.
+    And you should do it in the end of your document. 
+-->
+<script type="text/javascript" src="js/impress.js"></script>
+<script>impress().init();</script>
+</body>
+</html>
